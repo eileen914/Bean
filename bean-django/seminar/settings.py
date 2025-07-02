@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'reservation',
     'waiting',
     'seatlog',
+    'tag',
 ]
 
 MIDDLEWARE = [
