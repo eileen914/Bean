@@ -5,6 +5,4 @@ app_name = 'tag'
 
 urlpatterns = [
     path("", TagListView.as_view),
-    path("", CafeTagRatingView.as_view),
-    path("<int:rating_id>/", CafeTagRatingDetailView.as_view),
 ]
