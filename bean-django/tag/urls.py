@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import TagListView, CafeTagRatingView, CafeTagRatingDetailView
+from .views import TagListView
 
 app_name = 'tag'
 
 urlpatterns = [
     path("", TagListView.as_view),
-    path("", CafeTagRatingView.as_view),
-    path("<int:rating_id>/", CafeTagRatingDetailView.as_view),
 ]

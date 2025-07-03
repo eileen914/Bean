@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CafeUploadView, CafeListView, CafeDetailView, CafeImageUpdateView
+from .views import CafeUploadView, CafeListView, CafeDetailView, CafeImageUpdateView, CafeChatView, CafeTagRatingView, CafeTagRatingDetailView
 
 app_name = 'cafe'
 
@@ -8,4 +8,7 @@ urlpatterns = [
     path("update-images/", CafeImageUpdateView.as_view(), name='update_images'),
     path("", CafeListView.as_view()),
     path("<int:cafe_id>/", CafeDetailView.as_view()),
+    path("chat/", CafeChatView.as_view(), name='chat'),
+    path("", CafeTagRatingView.as_view),
+    path("<int:rating_id>/", CafeTagRatingDetailView.as_view),
 ]
