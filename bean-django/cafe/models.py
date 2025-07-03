@@ -9,6 +9,7 @@ class Cafe(models.Model):
     average_rating = models.FloatField(default=0.0)
     photo_urls = models.JSONField(default=list, blank=True)  # list
     pos_connected = models.BooleanField(default=False)
+    keyword = models.ManyToManyField(Tag, blank=True, related_name='keyword')
     tags = models.ManyToManyField(Tag, blank=True, through='CafeTagRating', related_name='cafes')
     created_at = models.DateTimeField(auto_now_add=True)
 
