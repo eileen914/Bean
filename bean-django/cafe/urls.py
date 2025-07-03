@@ -9,6 +9,6 @@ urlpatterns = [
     path("", CafeListView.as_view()),
     path("<int:cafe_id>/", CafeDetailView.as_view()),
     path("chat/", CafeChatView.as_view(), name='chat'),
-    path("", CafeTagRatingView.as_view),
-    path("<int:rating_id>/", CafeTagRatingDetailView.as_view),
+    path("tagrating/<int:tag_id>/", CafeTagRatingView.as_view),
+    path("tagrating/detail/<int:rating_id>/", CafeTagRatingDetailView.as_view),
 ]

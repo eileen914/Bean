@@ -19,9 +19,12 @@ import os
 
 class CafeListView(APIView):
     def get(self, request):
-        posts =Cafe.objects.all()
-        serializer = CafeSerializer(posts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            posts =Cafe.objects.all()[:100]
+            serializer = CafeSerializer(posts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            traceback.print_exc()
     
     def post(self, request):
         name = request.data.get("name")
@@ -136,7 +139,7 @@ class CafeDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class CafeChatView(APIView):
-    def get(self, request):
+    def post(self, request):
         try:
             question = request.data.get("question")
             if not question:
@@ -155,20 +158,20 @@ class CafeChatView(APIView):
             )
         
         # 직렬화
-        data = [
-            {
-                "id":          cafe.id,
-                "name":        cafe.name,
-                "address":     cafe.address,
-                "description": cafe.description,
-            }
-            for cafe in cafes
-        ]
-        return Response({"results": data})
+        # data = [
+        #     {
+        #         "id":          cafe.id,
+        #         "name":        cafe.name,
+        #         "address":     cafe.address,
+        #         "description": cafe.description,
+        #     }
+        #     for cafe in cafes
+        # ]
+        # return Response({"results": data})
 
-        # 직렬화
-        # serializer = CafeSerializer(cafes, many=True)
-        #return Response(serializer.data, status=status.HTTP_200_OK)
+        #직렬화
+        serializer = CafeSerializer(cafes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CafeUploadView(APIView):
@@ -245,7 +248,9 @@ class CafeTagRatingView(APIView):
         except:
             return Response({"detail": "Provided tag does not exist."}, status=status.HTTP_204_NO_CONTENT)
         
-        ratings = CafeTagRating.objects.filter(tag_id=tag_id).order_by('-rating') 
+        cafeId = request.data.get("cafe_id")
+        
+        ratings = CafeTagRating.objects.filter(tag_id=tag_id).filter(cafe_id=cafeId).order_by('-rating')
         serializer = CafeTagRatingSerializer(instance=ratings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
