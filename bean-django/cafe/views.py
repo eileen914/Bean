@@ -182,10 +182,10 @@ class CafeImageUpdateView(APIView):
                 photo_urls.append(photo_url)
                 idx += 1
 
-            print(f"Saving cafe {cafe.id} with images: {photo_urls}")
+            #print(f"Saving cafe {cafe.id} with images: {photo_urls}")
             cafe.photo_urls = photo_urls
             cafe.save()
-            print(f"Saved: {cafe.photo_urls}")
+            #print(f"Saved: {cafe.photo_urls}")
     
         return Response({"message": "Cafe images updated"}, status=status.HTTP_200_OK)
 
