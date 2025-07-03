@@ -23,3 +23,5 @@ urlpatterns = [
     path('api/review/', include('review.urls')),
     path('api/tag/', include('tag.urls')),
 ]
+
+

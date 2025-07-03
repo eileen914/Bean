@@ -11,6 +11,7 @@ class Cafe(models.Model):
     pos_connected = models.BooleanField(default=False)
     keyword = models.ManyToManyField(Tag, blank=True, related_name='keyword')
     tags = models.ManyToManyField(Tag, blank=True, through='CafeTagRating', related_name='cafes')
+    keywords = models.ManyToManyField(Tag, blank=True, related_name="keyword")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
