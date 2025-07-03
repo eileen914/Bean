@@ -2,15 +2,19 @@ from django.shortcuts import render
 
 # Create your views here.
 # gpt/views.py
-import openai
-import os
 import json
-from dotenv import load_dotenv
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from rest_framework import viewsets
+
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 review_description_prompt = (
     "각 카페에 대한 리뷰 내용을 종합하여, 원칙 1~4를 참고해 해당 카페의 전반적인 특징을 서술하는 요약문(cafe description)을 작성해줘.\n"
@@ -57,59 +61,39 @@ review_keyword_prompt = (
 )
 
 def review_description(review_text):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+    response = client.chat.completions.create(
+    model="gpt-4.1-nano",
+    messages=[
+        {"role": "system", "content": review_description_prompt},
+        {"role": "user", "content": review_text}
+    ]
+)
+    return response.choices[0].message.content
+
+
+@csrf_exempt
+def review_tag_rating(review_text: str) -> dict:
+    response = client.chat.completions.create(
+        model="gpt-4.1-nano",
         messages=[
-            {"role": "system", "content": review_description_prompt},
+            {"role": "system", "content": review_tag_rating_prompt},
+            {"role": "user",   "content": review_text}
+        ]
+    )
+    content = response.choices[0].message.content
+    return json.loads(content)
+
+
+
+@csrf_exempt
+def review_keyword(review_text: str) -> list:
+    response = client.chat.completions.create(
+        model="gpt-4.1-nano",
+        messages=[
+            {"role": "system", "content": review_keyword_prompt},
             {"role": "user", "content": review_text}
         ]
     )
-    return response['choices'][0]['message']['content']
+    content = response.choices[0].message.content
+    return json.loads(content)  
 
-
-@csrf_exempt
-def review_tag_rating(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            review = data.get("review", "")
-            
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": review_tag_rating_prompt},
-                    {"role": "user", "content": review}
-                ]
-            )
-            content = response['choices'][0]['message']['content']
-            scores = json.loads(content)  # GPT가 JSON 형식으로 응답했다고 가정
-            return JsonResponse({"scores": scores})
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
-
-
-@csrf_exempt
-def review_keyword(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            review = data.get("review", "")
-
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": review_keyword_prompt},
-                    {"role": "user", "content": review}
-                ]
-            )
-            content = response['choices'][0]['message']['content']
-            keywords = json.loads(content)  
-            return JsonResponse({"keywords": keywords})
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
