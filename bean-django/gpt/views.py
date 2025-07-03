@@ -71,48 +71,28 @@ def review_description(review_text):
 
 
 @csrf_exempt
-def review_tag_rating(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            review = data.get("review", "")
-            
-            response = client.chat.completions.create(
-                model="gpt-4.1-nano",
-                messages=[
-                    {"role": "system", "content": review_tag_rating_prompt},
-                    {"role": "user", "content": review}
-                ]
-            )
-            content = response.choices[0].message.content
-            scores = json.loads(content)  # GPT가 JSON 형식으로 응답했다고 가정
-            return JsonResponse({"scores": scores})
+def review_tag_rating(review_text: str) -> dict:
+    response = client.chat.completions.create(
+        model="gpt-4.1-nano",
+        messages=[
+            {"role": "system", "content": review_tag_rating_prompt},
+            {"role": "user",   "content": review_text}
+        ]
+    )
+    content = response.choices[0].message.content
+    return json.loads(content)
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-    
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 
 @csrf_exempt
-def review_keyword(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            review = data.get("review", "")
+def review_keyword(review_text: str) -> list:
+    response = client.chat.completions.create(
+        model="gpt-4.1-nano",
+        messages=[
+            {"role": "system", "content": review_keyword_prompt},
+            {"role": "user", "content": review_text}
+        ]
+    )
+    content = response.choices[0].message.content
+    return json.loads(content)  
 
-            response = client.chat.completions.create(
-                model="gpt-4.1-nano",
-                messages=[
-                    {"role": "system", "content": review_keyword_prompt},
-                    {"role": "user", "content": review}
-                ]
-            )
-            content = response.choices[0].message.content
-            keywords = json.loads(content)  
-            return JsonResponse({"keywords": keywords})
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
-
-    return JsonResponse({"error": "Only POST allowed"}, status=405)

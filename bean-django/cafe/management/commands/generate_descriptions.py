@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
-from cafe.models import Cafe
-from gpt.views import review_description
-from review.models import Review
 
+from cafe.models import Cafe, CafeTagRating
+from review.models import Review
+from tag.models import Tag
+from gpt.views import review_description
 
 class Command(BaseCommand):
     help = "Generate and save GPT-based cafe descriptions"
@@ -23,3 +24,4 @@ class Command(BaseCommand):
                 print(f"Saved: {description[:50]}...")
             except Exception as e:
                 print(f"Error for {cafe.name}: {str(e)}")
+
