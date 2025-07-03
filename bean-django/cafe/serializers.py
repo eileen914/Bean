@@ -4,6 +4,7 @@ from tag.serializers import TagSerializer
 
 class CafeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
+    keywords = TagSerializer(many = True, read_only = True)
     class Meta:
         model = Cafe
         fields = '__all__'

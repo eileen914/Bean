@@ -6,12 +6,131 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-
-from .models import Cafe
+from .models import Cafe, CafeTagRating
 from .serializers import CafeSerializer
+from tag.models import Tag
 
 import json
 import os
+
+class CafeListView(APIView):
+    def get(self, request):
+        posts =Cafe.objects.all()
+        serializer = CafeSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        name = request.data.get("name")
+        address = request.data.get("address")
+        description = request.data.get("description")
+        photo_urls = request.data.get("photo_urls")
+        pos_connected = request.data.get("pos_connected")
+
+        tag_contents = request.data.get("tags")
+        keyword_contents = request.data.get("keywords")
+
+        if not description:
+            description = ""
+        
+        if not photo_urls:
+            photo_urls = []
+        
+        if not pos_connected:
+            pos_connected = False
+
+        cafe = Cafe.objects.create(
+                name=name,
+                address=address,
+                description=description,
+                has_wifi=True,
+                average_rating=0.0,
+                photo_urls=photo_urls,
+                pos_connected=pos_connected
+            )
+
+        if tag_contents is not None:
+            for tag_content in tag_contents:
+                tag = Tag.objects.create(content = tag_content)
+                CafeTagRating.objects.create(cafe = cafe, tag = tag, rating = 0.0)
+
+        if keyword_contents is not None:
+            for keyword_content in keyword_contents:
+                if not Tag.objects.filter(content = keyword_content).exists():
+                    cafe.keywords.create(content = keyword_content)
+                else:
+                    cafe.keywords.add(Tag.objects.get(content = keyword_content))
+
+        serializer = CafeSerializer(cafe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CafeDetailView(APIView):
+    def get(self, request, cafe_id):
+        try:
+            cafe = Cafe.objects.get(id=cafe_id)
+        except:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CafeSerializer(instance=cafe)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, cafe_id):
+        try:
+            cafe = Cafe.objects.get(id=cafe_id)
+        except:
+            return Response(
+                {"detail": "Cafe Not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        cafe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def put(self, request, cafe_id):
+        try:
+            cafe = Cafe.objects.get(id=cafe_id)
+        except:
+            return Response(
+                {"detail": "Cafe not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        name = request.data.get("name")
+        address = request.data.get("address")
+        description = request.data.get("description")
+        photo_urls = request.data.get("photo_urls")
+        pos_connected = request.data.get("pos_connected")
+        
+        if name:
+            cafe.name = name
+        
+        if address:
+            cafe.address = address
+        
+        if description:
+            cafe.description = description
+        
+        if photo_urls:
+            cafe.photo_urls = photo_urls
+        
+        if pos_connected:
+            cafe.pos_connected = pos_connected
+
+        #tag_contents = request.data.get("tags") 일단 태그 데이터는 여기서 수정 X
+        keyword_contents = request.data.get("keywords")
+
+        
+        if keyword_contents is not None:
+            cafe.keywords.clear()
+            for keyword_content in keyword_contents:
+                if not Tag.objects.filter(content=keyword_content).exists():
+                    cafe.keywords.create(content=keyword_content)
+                else:
+                    cafe.keywords.add(Tag.objects.get(content=keyword_content))
+
+        cafe.save()
+        serializer = CafeSerializer(instance=cafe)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class CafeUploadView(APIView):
     def post(self, request):
@@ -47,7 +166,28 @@ class CafeUploadView(APIView):
 
         serializer = CafeSerializer(created_cafes, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class CafeImageUpdateView(APIView):
+    def put(self, request):
+        base_path = "data/cafe_images/"
+        idx = 0
+        imageLen = 132
 
+        cafes = Cafe.objects.all()
+        for cafe in cafes:
+            photo_urls = []
+            for i in range(3):
+                photoIndex = (idx%imageLen) + 1
+                photo_url = f"{base_path}{photoIndex}.jpg"
+                photo_urls.append(photo_url)
+                idx += 1
+
+            print(f"Saving cafe {cafe.id} with images: {photo_urls}")
+            cafe.photo_urls = photo_urls
+            cafe.save()
+            print(f"Saved: {cafe.photo_urls}")
+    
+        return Response({"message": "Cafe images updated"}, status=status.HTTP_200_OK)
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all().order_by('-created_at')
