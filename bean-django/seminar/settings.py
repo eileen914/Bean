@@ -17,6 +17,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import os, environ
 
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+
+# 환경변수 불러오기
+SECRET_KEY = os.getenv("SECRET_KEY")  # ✅ dotenv 방식
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+DEBUG = os.getenv("DEBUG", "False") == "True"
+
+"""
 env = environ.Env(
     DEBUG=(bool, True)
 )
@@ -31,8 +42,15 @@ environ.Env.read_env(
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY =env('SECRET_KEY')
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # ✅ 이렇게
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+"""
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
