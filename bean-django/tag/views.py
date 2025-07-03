@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 from .models import Tag
 from .serializers import TagSerializer
 
-from cafe.models import Cafe
-from cafe.serializers import CafeSerializer
+from cafe.models import Cafe, CafeTagRating
+from cafe.serializers import CafeSerializer, CafeTagRatingSerializer
 from drf_yasg.utils import swagger_auto_schema
 
 
@@ -42,14 +42,14 @@ class TagListView(APIView):
     tag = Tag.objects.create(content=content)
     serializer = TagSerializer(instance = tag)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
- 
- 
-class TagDetailView(APIView):
+
+
+class CafeTagRatingView(APIView):
   
   @swagger_auto_schema(
-    operation_id='태그 내부 게시물 조회',
-    operation_description='해당 태그가 달린 게시물을 조회합니다.',
-    responses={200: CafeSerializer(many=True), 204: 'No Content'}
+    operation_id='태그에 해당하는 카페와 별점 조회',
+    operation_description='해당 태그에 대한 카페와 별점을 별점순으로 조회합니다.',
+    responses={200: CafeTagRatingSerializer(many=True), 204: 'No Content'}
   )
   def get(self, request, tag_id):
     try:
@@ -57,6 +57,8 @@ class TagDetailView(APIView):
     except:
       return Response({"detail": "Provided tag does not exist."}, status=status.HTTP_204_NO_CONTENT)
     
-    cafes = Cafe.objects.filter(tags=tag_id)
-    serializer = CafeSerializer(instance=cafes, many=True)
+    ratings = CafeTagRating.objects.filter(tag_id=tag_id).order_by('-rating') 
+    serializer = CafeTagRatingSerializer(instance=ratings, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+  
+  
