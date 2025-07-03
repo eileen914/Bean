@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/cafe/', include('cafe.urls')),
     path('api/review/', include('review.urls')),
     path('api/tag/', include('tag.urls')),
+    path('api/gpt/', include('gpt.urls')),
 ]
 
 
