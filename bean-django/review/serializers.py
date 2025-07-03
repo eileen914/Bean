@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import Cafe
+from .models import Review
 from tag.serializers import TagSerializer
 
-class CafeSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     class Meta:
-        model = Cafe
+        model = Review
         fields = '__all__'
