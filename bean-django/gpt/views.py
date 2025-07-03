@@ -15,7 +15,6 @@ from dotenv import load_dotenv
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
 review_description_prompt = (
     "각 카페에 대한 리뷰 내용을 종합하여, 원칙 1~4를 참고해 해당 카페의 전반적인 특징을 서술하는 요약문(cafe description)을 작성해줘.\n"
     "원칙 1. 단순한 감상 요약이 아닌 정보 중심의 요약문으로 작성한다. 어떤 분위기의 공간인지, 어떤 메뉴가 인기 있는지, 어떤 사람들이 주로 방문하는지, 공간 구성이나 좌석/소음/콘센트 등 물리적 특징이 어떤지를 구체적으로 기술한다.\n"

@@ -13,7 +13,8 @@ from drf_yasg.utils import swagger_auto_schema
 
 class ReviewCrawlingView(APIView):
     def post(self, request):
-        cafes = Cafe.objects.all()
+        #cafes = Cafe.objects.all()
+        cafes = Cafe.objects.filter(address__contains="관악구")
         total_created = 0
         results = []
 
